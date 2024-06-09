@@ -35,7 +35,7 @@ TimeIntegration:
 Snapshots:
   basename:            fTTnu_snapshot
   output_list_on:      1
-  output_list:         ../../cosmology_tables/output_list.txt
+  output_list:         ../../cosmology_tables/output_list_reduced.txt
   invoke_ps:		   1
 
 # Scheduler options
