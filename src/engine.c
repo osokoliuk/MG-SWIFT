@@ -4035,53 +4035,53 @@ void engine_struct_restore(struct engine *e, FILE *stream) {
   e->forcerepart = 0;
 
   size_t coefficients (FILE *fp, double *xs, double *ys)
-    {
-      char buf[MAXC];         /* buffer for reading each line */ 
-      size_t ncoeff = 0;      /* number of coefficient pairs read */
-      
-      while (ncoeff < MAXC && fgets (buf, MAXC, fp))  /* read each line */
-        /* if it contains 2 double values */
-        if (sscanf (buf, "%lf %lf", &xs[ncoeff], &ys[ncoeff]) == 2)
-    ncoeff++;       /* increment counter */
-      
-      return ncoeff;          /* return total count of pairs read */
-    }
-    
-    e->xs = (double *)malloc(sizeof(double)*(MAXC));
-    e->ys = (double *)malloc(sizeof(double)*(MAXC));    /* arrays of MAXC doubles */
-    size_t n = 0;                         /* count of doubles returned */
-    
-    /*Parse the cosmology kind*/
-    char cosmology_type[32] = {0};
-    char cosmology_tables_dir[256] = {0};
-    char filepath[300] = {0};
+  {
+  char buf[MAXC];         /* buffer for reading each line */ 
+  size_t ncoeff = 0;      /* number of coefficient pairs read */
   
-    parser_get_param_string(params, "Cosmology:cosmology_type", cosmology_type);
-    parser_get_param_string(params, "Cosmology:cosmology_tables_dir", cosmology_tables_dir);
-    
-    /* Read Hubble table */
-    FILE *fp;
+  while (ncoeff < MAXC && fgets (buf, MAXC, fp))  /* read each line */
+  /* if it contains 2 double values */
+  if (sscanf (buf, "%lf %lf", &xs[ncoeff], &ys[ncoeff]) == 2)
+  ncoeff++;       /* increment counter */
   
-    if ((strcmp(cosmology_type, "fT")==0) || (strcmp(cosmology_type, "fTnu")==0)) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"geff_table_ft.txt");
-     } else if ((strcmp(cosmology_type, "fTT")==0) || (strcmp(cosmology_type, "fTTnu")==0)) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"geff_table_ftt.txt");
-    } else if ((strcmp(cosmology_type, "fR")==0) || (strcmp(cosmology_type, "fRnu")==0)) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"geff_table_fr.txt");
-    } else {
-      error ("No such cosmology type exists!");
-    }
+  return ncoeff;          /* return total count of pairs read */
+  }
   
-    fp = fopen(filepath,"r");
-    
-    if (!fp)   /* validate file open for reading */
-      error ("file open failed");
-    
-    if (!(n = coefficients (fp, e->xs, e->ys))) {   /* validate coeff pairs read */
-      error("no double values read from file.");
-    }
-    fclose (fp);
+  e->xs = (double *)malloc(sizeof(double)*(MAXC));
+  e->ys = (double *)malloc(sizeof(double)*(MAXC));    /* arrays of MAXC doubles */
+  size_t n = 0;                         /* count of doubles returned */
+  
+  /*Parse the cosmology kind*/
+  char cosmology_type[32] = {0};
+  char cosmology_tables_dir[256] = {0};
+  char filepath[300] = {0};
+  
+  parser_get_param_string(params, "Cosmology:cosmology_type", cosmology_type);
+  parser_get_param_string(params, "Cosmology:cosmology_tables_dir", cosmology_tables_dir);
+  
+  /* Read Hubble table */
+  FILE *fp;
+  
+  if ((strcmp(cosmology_type, "fT")==0) || (strcmp(cosmology_type, "fTnu")==0)) {
+  strcpy(filepath,cosmology_tables_dir);
+  strcat(filepath,"geff_table_ft.txt");
+  } else if ((strcmp(cosmology_type, "fTT")==0) || (strcmp(cosmology_type, "fTTnu")==0)) {
+  strcpy(filepath,cosmology_tables_dir);
+  strcat(filepath,"geff_table_ftt.txt");
+  } else if ((strcmp(cosmology_type, "fR")==0) || (strcmp(cosmology_type, "fRnu")==0)) {
+  strcpy(filepath,cosmology_tables_dir);
+  strcat(filepath,"geff_table_fr.txt");
+  } else {
+  error ("No such cosmology type exists!");
+  }
+  
+  fp = fopen(filepath,"r");
+  
+  if (!fp)   /* validate file open for reading */
+  error ("file open failed");
+  
+  if (!(n = coefficients (fp, e->xs, e->ys))) {   /* validate coeff pairs read */
+  error("no double values read from file.");
+  }
+  fclose (fp);
 }
