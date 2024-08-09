@@ -1666,6 +1666,12 @@ void cosmology_struct_dump(const struct cosmology *cosmology, FILE *stream) {
                          cosmology->N_nu, stream, "cosmology->deg_nu",
                          "neutrino degeneracies");
   }
+  restart_write_blocks((double *)c->xs, MAXC,
+                        1, stream, "c->xs",
+                        "x interp array");
+  restart_write_blocks((double *)e->ys, MAXC,
+                        1, stream, "c->ys",
+                        "y interp array");
 }
 
 /**
@@ -1680,6 +1686,15 @@ void cosmology_struct_restore(int enabled, struct cosmology *cosmology,
                               FILE *stream) {
   restart_read_blocks((void *)cosmology, sizeof(struct cosmology), 1, stream,
                       NULL, "cosmology function");
+
+  c->xs =
+    (double *)swift_malloc("xs", cosmology->xs * sizeof(double));
+  restart_read_blocks((double *)cosmology->xs, MAXC,
+                    1, stream, NULL, "x interp array");
+  c->ys =
+    (double *)swift_malloc("ys", cosmology->ys * sizeof(double));
+  restart_read_blocks((double *)cosmology->ys, MAXC,
+                    1, stream, NULL, "x interp array");
 
   /* Restore the neutrino mass and degeneracy arrays if necessary */
   if (cosmology->N_nu > 0) {
@@ -1698,52 +1713,7 @@ void cosmology_struct_restore(int enabled, struct cosmology *cosmology,
     cosmology_init_neutrino_tables(cosmology);
     cosmology_init_tables(cosmology);
     
-    c->xs = (double *)malloc(sizeof(double)*(MAXC));
-    c->ys = (double *)malloc(sizeof(double)*(MAXC));    /* arrays of MAXC doubles */
-    size_t n = 0;                         /* count of doubles returned */
-    
-    /*Parse the cosmology kind*/
-    char cosmology_type[32] = {0};
-    char cosmology_tables_dir[256] = {0};
-    char filepath[300] = {0};
-
-    parser_get_param_string(params, "Cosmology:cosmology_type", cosmology_type);
-    parser_get_param_string(params, "Cosmology:cosmology_tables_dir", cosmology_tables_dir);
-    
-    /* Read Hubble table */
-    FILE *fp;
-
-    if (strcmp(cosmology_type, "fT")==0) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"hubble_table_ft.txt");
-    } else if (strcmp(cosmology_type, "fTT")==0) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"hubble_table_ftt.txt");
-    } else if (strcmp(cosmology_type, "fR")==0) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"hubble_table_fr.txt");
-    } else if (strcmp(cosmology_type, "fTnu")==0) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"hubble_table_ftnu.txt");
-    } else if (strcmp(cosmology_type, "fTTnu")==0) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"hubble_table_fttnu.txt");
-    } else if (strcmp(cosmology_type, "fRnu")==0) {
-      strcpy(filepath,cosmology_tables_dir);
-      strcat(filepath,"hubble_table_frnu.txt");
-    } else {
-      error ("No such cosmology type exists!");
-    }
-
-    fp = fopen(filepath,"r");
-
-    if (!fp)   /* validate file open for reading */
-      error ("file open failed");
-    
-    if (!(n = coefficients (fp, c->xs, c->ys))) {   /* validate coeff pairs read */
-      error("no double values read from file.");
-    }
-    fclose (fp);
+   
   }
 }
 
